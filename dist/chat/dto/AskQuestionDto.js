@@ -21,4 +21,3 @@ __decorate([
     (0, swagger_1.ApiProperty)({ example: '一只可爱的黑白色小猫' }),
     __metadata("design:type", String)
 ], AskQuestionDto.prototype, "prompt", void 0);
-//# sourceMappingURL=AskQuestionDto.js.map

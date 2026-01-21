@@ -22,18 +22,36 @@ let ChatController = class ChatController {
     constructor(chatService) {
         this.chatService = chatService;
     }
-    async askQuestion(body) {
-        const res = await this.chatService.getResponse(body.prompt);
-        return response_util_1.ResponseUtil.success(res);
+    async askQuestion(query) {
+        const res = await this.chatService.getResponse(query.prompt);
+        const { prompt, negativePrompt } = await this.chatService.preprocessResponse(res.message.content ?? '');
+        return response_util_1.ResponseUtil.success({
+            statusCode: 200,
+            message: '请求成功',
+            data: {
+                prompt,
+                negativePrompt,
+            },
+        });
     }
 };
 exports.ChatController = ChatController;
 __decorate([
-    (0, common_1.Post)('askQuestion'),
-    (0, swagger_1.ApiOperation)({ summary: '提示词AI生成接口', description: '根据用户输入的画面描述生成相应的内容' }),
+    (0, common_1.Get)('askQuestion'),
+    (0, swagger_1.ApiOperation)({
+        summary: '提示词AI生成接口',
+        description: '根据用户输入的画面描述生成相应的内容',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'prompt',
+        required: true,
+        type: String,
+        description: '画面描述提示词',
+        example: '一只可爱的黑白色小猫',
+    }),
     (0, swagger_1.ApiResponse)({ status: 200, description: '成功' }),
     (0, swagger_1.ApiResponse)({ status: 400, description: '请求参数错误' }),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [AskQuestionDto_1.AskQuestionDto]),
     __metadata("design:returntype", Promise)
@@ -43,4 +61,3 @@ exports.ChatController = ChatController = __decorate([
     (0, common_1.Controller)('chat'),
     __metadata("design:paramtypes", [chat_service_1.ChatService])
 ], ChatController);
-//# sourceMappingURL=chat.controller.js.map

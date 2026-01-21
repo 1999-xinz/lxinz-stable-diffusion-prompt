@@ -40,7 +40,7 @@ yarn install
 
 ## 2-示例
 
-调用POST接口:（ip和端口可以按照nestjs文档在main.ts中进行自定义修改，目前默认本地）
+调用GET接口:（ip和端口可以按照nestjs文档在main.ts中进行自定义修改，目前默认本地）
 
 `http://localhost:3000/chat/askQuestion`
 

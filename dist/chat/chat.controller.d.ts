@@ -3,5 +3,5 @@ import { AskQuestionDto } from './dto/AskQuestionDto';
 export declare class ChatController {
     private readonly chatService;
     constructor(chatService: ChatService);
-    askQuestion(body: AskQuestionDto): Promise<any>;
+    askQuestion(query: AskQuestionDto): Promise<any>;
 }

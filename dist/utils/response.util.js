@@ -18,4 +18,3 @@ class ResponseUtil {
     }
 }
 exports.ResponseUtil = ResponseUtil;
-//# sourceMappingURL=response.util.js.map

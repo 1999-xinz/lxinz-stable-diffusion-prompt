@@ -19,19 +19,30 @@ let ChatService = class ChatService {
     constructor() {
         this.client = new openai_1.default({
             apiKey: process.env.OPENAI_API_KEY,
-            baseURL: 'https://api.openai-proxy.org/v1'
+            baseURL: process.env.BASE_URL ? process.env.BASE_URL : undefined,
         });
     }
     async getResponse(prompt) {
         const params = {
             messages: [
                 { role: 'system', content: META_PROMPT },
-                { role: 'user', content: `我的主题是：${prompt}` }
+                { role: 'user', content: `我的主题是：${prompt}` },
             ],
-            model: 'gpt-3.5-turbo',
+            model: process.env.MODEL ? process.env.MODEL : 'gpt-3.5-turbo',
         };
         const chatCompletion = await this.client.chat.completions.create(params);
         return chatCompletion.choices[0];
+    }
+    async preprocessResponse(content) {
+        if (!content || typeof content !== 'string') {
+            return { prompt: '', negativePrompt: '' };
+        }
+        const promptMatch = content.match(/\*\*Prompt:\*\*\s*([\s\S]*?)\n\*\*Negative Prompt:\*\*/i);
+        const negativeMatch = content.match(/\*\*Negative Prompt:\*\*\s*([\s\S]*)$/i);
+        return {
+            prompt: promptMatch ? promptMatch[1].trim() : '',
+            negativePrompt: negativeMatch ? negativeMatch[1].trim() : '',
+        };
     }
 };
 exports.ChatService = ChatService;
@@ -94,4 +105,3 @@ Stable Diffusion是一款利用深度学习的文生图模型，支持通过使�
 - tag 按重要性从高到低的顺序排列。
 - 我给你的主题可能是用中文描述，你给出的prompt和negative prompt只用英文。
 `;
-//# sourceMappingURL=chat.service.js.map

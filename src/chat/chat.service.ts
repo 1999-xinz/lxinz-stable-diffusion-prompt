@@ -1,29 +1,53 @@
 import { Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
 
+interface IPreprocessedResponse {
+	prompt: string;
+	negativePrompt: string;
+}
+
 @Injectable()
 export class ChatService {
-  private client: any;
+	private client: any;
 
-  constructor() {
-    this.client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-      baseURL: 'https://api.openai-proxy.org/v1'
-    });
-  }
+	constructor() {
+		this.client = new OpenAI({
+			apiKey: process.env.OPENAI_API_KEY,
+			baseURL: process.env.BASE_URL ? process.env.BASE_URL : undefined,
+		});
+	}
 
-  async getResponse(prompt: string): Promise<any> {
-    const params: OpenAI.Chat.ChatCompletionCreateParams = {
-      messages: [
-        { role: 'system', content: META_PROMPT },
-        { role: 'user', content: `我的主题是：${prompt}` }
-      ],
-      model: 'gpt-3.5-turbo',
-    }
-    const chatCompletion: OpenAI.Chat.ChatCompletion = await this.client.chat.completions.create(params);
+	async getResponse(prompt: string): Promise<any> {
+		const params: OpenAI.Chat.ChatCompletionCreateParams = {
+			messages: [
+				{ role: 'system', content: META_PROMPT },
+				{ role: 'user', content: `我的主题是：${prompt}` },
+			],
+			model: process.env.MODEL ? process.env.MODEL : 'gpt-3.5-turbo',
+		};
+		const chatCompletion: OpenAI.Chat.ChatCompletion =
+			await this.client.chat.completions.create(params);
 
-    return chatCompletion.choices[0];
-  }
+		return chatCompletion.choices[0];
+	}
+
+	async preprocessResponse(content: string): Promise<IPreprocessedResponse> {
+		if (!content || typeof content !== 'string') {
+			return { prompt: '', negativePrompt: '' };
+		}
+
+		const promptMatch = content.match(
+			/\*\*Prompt:\*\*\s*([\s\S]*?)\n\*\*Negative Prompt:\*\*/i,
+		);
+		const negativeMatch = content.match(
+			/\*\*Negative Prompt:\*\*\s*([\s\S]*)$/i,
+		);
+
+		return {
+			prompt: promptMatch ? promptMatch[1].trim() : '',
+			negativePrompt: negativeMatch ? negativeMatch[1].trim() : '',
+		};
+	}
 }
 
 const META_PROMPT = `
@@ -80,4 +104,4 @@ Stable Diffusion是一款利用深度学习的文生图模型，支持通过使�
 - 使用英文半角","做分隔符。
 - tag 按重要性从高到低的顺序排列。
 - 我给你的主题可能是用中文描述，你给出的prompt和negative prompt只用英文。
-`
+`;
